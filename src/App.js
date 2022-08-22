@@ -1,23 +1,27 @@
-import logo from './logo.svg';
+import axios from 'axios';
 import './App.css';
 
 function App() {
+  const api = axios.create({
+    baseURL:"http://localhost:8080/"
+  });
+
+  const getAllClients = () => api.get("/clients")
+
+  let users = []
+
+  const printClients = async () => {
+    users = await getAllClients();
+    console.log(users.data);
+  }
+
+  printClients();
+
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <p>hej</p>
+      {users && users.map((u) => (<div id={u.id}>hej{u.id}</div>))}
     </div>
   );
 }
