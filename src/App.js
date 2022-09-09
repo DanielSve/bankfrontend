@@ -8,7 +8,6 @@ function App() {
     baseURL: 'http://localhost:8080/',
   });
 
-
   const getAllClients = () => api.get('/clients');
 
   const post = async (user) => {
@@ -31,7 +30,16 @@ function App() {
       },
     });
     return response;
-  }
+  };
+
+  const getClient = async (id) => {
+    const response = await api.get(`/clients/${id}`, {
+      headers: {
+        Authorization: '',
+      },
+    });
+    return response;
+  };
 
   const addClientToDatabase = async (user) =>
     await api.post('clients/add', user, {
@@ -40,8 +48,16 @@ function App() {
       },
     });
 
+  const updateExistingClient = async (user) =>
+    await api.put(`clients/update/${user.id}`, user, {
+      headers: {
+        Authorization: '',
+      },
+    });
+
   const [users, setUsers] = useState([]);
   const [message, setMessage] = useState('');
+  const [updateClient, setUpdateClient] = useState();
 
   const [newUser, setNewUser] = useState({
     firstName: '',
@@ -68,6 +84,7 @@ function App() {
     ) {
       try {
         const response = await post(newUser);
+        getClients();
         setMessage('Registration successful!');
         setNewUser({
           firstName: '',
@@ -87,17 +104,35 @@ function App() {
     setNewUser({ ...newUser, [e.target.name]: e.target.value });
   };
 
+  const handleUpdateChange = (e) => {
+    setUpdateClient({ ...updateClient, [e.target.name]: e.target.value });
+  };
+
   const deleteClient = async (id) => {
     console.log(id);
     const response = await remove(id);
     console.log(response);
+    getClients();
   };
 
-  const updateClient = async (id) => {
-
+  const updateClientFunc = async (id) => {
+    const userFromDB = await getClient(id);
+    setUpdateClient(userFromDB.data);
   };
 
-  console.log(newUser);
+  const saveUpdatedClient = async(e) => {
+    try {
+    const response = await updateExistingClient(updateClient);
+    setMessage("Update successful!")
+    setUpdateClient("")
+    getClients();
+    } catch (error) {
+      setMessage("Update failed, please try again")
+      console.log(error);
+    }
+  };
+
+  console.log(updateClient);
 
   return (
     <div className='App'>
@@ -147,14 +182,51 @@ function App() {
           {users &&
             users.map((user) => (
               <tr key={user.id}>
-                <td>{user.firstName}</td>
-                <td>{user.lastName}</td>
-                <td>{user.email}</td>
+                <td>
+                  {updateClient && updateClient.id === user.id ? (
+                    <input
+                      name='firstName'
+                      value={updateClient.firstName}
+                      onChange={handleUpdateChange}
+                    ></input>
+                  ) : (
+                    user.firstName
+                  )}
+                </td>
+                <td>
+                  {updateClient && updateClient.id === user.id ? (
+                    <input
+                      name='lastName'
+                      value={updateClient.lastName}
+                      onChange={handleUpdateChange}
+                    ></input>
+                  ) : (
+                    user.lastName
+                  )}
+                </td>
+                <td>
+                  {updateClient && updateClient.id === user.id ? (
+                    <input
+                      name='email'
+                      value={updateClient.email}
+                      onChange={handleUpdateChange}
+                    ></input>
+                  ) : (
+                    user.email
+                  )}
+                </td>
                 <td>
                   <button onClick={() => deleteClient(user.id)}>Remove</button>
                 </td>
                 <td>
-                  <button onClick={() => updateClient(user.id)}>Update</button>
+                  <button onClick={() => updateClientFunc(user.id)}>
+                    Update
+                  </button>
+                </td>
+                <td>
+                  <button onClick={() => saveUpdatedClient(user.id)}>
+                    Save
+                  </button>
                 </td>
               </tr>
             ))}
