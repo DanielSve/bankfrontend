@@ -93,6 +93,10 @@ function App() {
     console.log(response);
   };
 
+  const updateClient = async (id) => {
+
+  };
+
   console.log(newUser);
 
   return (
@@ -148,6 +152,9 @@ function App() {
                 <td>{user.email}</td>
                 <td>
                   <button onClick={() => deleteClient(user.id)}>Remove</button>
+                </td>
+                <td>
+                  <button onClick={() => updateClient(user.id)}>Update</button>
                 </td>
               </tr>
             ))}
